@@ -8,13 +8,12 @@ module.exports = (grunt) ->
   config =
     pkg: grunt.file.readJSON "package.json"
 
-    uglify:
+    concat:
       dist:
         options:
-          mangle: true
           banner: copyright
         files:
-          "<%= pkg.name %>.min.js": ["<%= pkg.name %>.js"]
+          "<%= pkg.name %>.js" : ["<%= pkg.name %>.js"]
 
     esteWatch:
       options:
@@ -22,6 +21,7 @@ module.exports = (grunt) ->
         livereload:
           enabled: false
       js: ->
+        # return ["concat", "jshint", "uglify"]
         return ["jshint", "uglify"]
 
     jshint:
@@ -45,6 +45,14 @@ module.exports = (grunt) ->
         opt["maxlen"]            = 120
 
         return ret
+
+    uglify:
+      dist:
+        options:
+          mangle: true
+          banner: copyright
+        files:
+          "<%= pkg.name %>.min.js" : ["<%= pkg.name %>.js"]
 
   grunt.initConfig config
   matchdep.filterDev("grunt-*").forEach grunt.loadNpmTasks
