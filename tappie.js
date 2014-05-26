@@ -1,10 +1,12 @@
+// Tappie 1.0.0 Copyright (C) 2014 Yuya Hashimoto, MIT License.
+// See https://github.com/yuya/tappie
 ;(function (global, document) {
-    var touch       = {},
-        hasTouch    = "ontouchstart" in global,
-        touchStart  = hasTouch ? "touchstart"  : "mousedown",
-        touchMove   = hasTouch ? "touchmove"   : "mousemove",
-        touchEnd    = hasTouch ? "touchend"    : "mouseup",
-        touchCancel = hasTouch ? "touchcancel" : "mouseleave",
+    var touch        = {},
+        hasTouch     = "ontouchstart" in global,
+        touchStart   = hasTouch ? "touchstart"  : "mousedown",
+        touchMove    = hasTouch ? "touchmove"   : "mousemove",
+        touchEnd     = hasTouch ? "touchend"    : "mouseup",
+        touchCancel  = hasTouch ? "touchcancel" : "mouseleave",
         longTapDelay = 750,
         touchTimeout, tapTimeout, swipeTimeout, longTapTimeout
     ;
@@ -104,7 +106,7 @@
             deltaY += Math.abs(touch.y1 - touch.y2); 
         }
 
-        function handleTouchEnd(event) {
+        function handleTouchEnd() {
             cancelLongTap();
             
             if ((touch.x2 && Math.abs(touch.x1 - touch.x2) > 30) ||
@@ -146,9 +148,9 @@
             }
         }
 
-        document.addEventListener(touchStart, function (event) { handleTouchStart(event)  }, false);
-        document.addEventListener(touchMove,  function (event) { handleTouchMove(event)   }, false);
-        document.addEventListener(touchEnd,   function (event) { handleTouchEnd(event)    }, false);
+        document.addEventListener(touchStart, function (event) { handleTouchStart(event);  }, false);
+        document.addEventListener(touchMove,  function (event) { handleTouchMove(event);   }, false);
+        document.addEventListener(touchEnd,   function ()      { handleTouchEnd();         }, false);
 
         document.addEventListener(touchCancel, cancelAll, false);
         global.addEventListener("scroll",      cancelAll, false);
