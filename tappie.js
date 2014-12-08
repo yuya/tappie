@@ -1,13 +1,15 @@
 // Tappie 1.0.0 Copyright (C) 2014 Yuya Hashimoto, MIT License.
 // See https://github.com/yuya/tappie
 ;(function (global, document) {
-    var touch        = {},
-        hasTouch     = "ontouchstart" in global,
-        touchStart   = hasTouch ? "touchstart"  : "mousedown",
-        touchMove    = hasTouch ? "touchmove"   : "mousemove",
-        touchEnd     = hasTouch ? "touchend"    : "mouseup",
-        touchCancel  = hasTouch ? "touchcancel" : "mouseleave",
-        longTapDelay = 750,
+    var touch         = {},
+        hasTouch      = "ontouchstart" in global,
+        touchStart    = hasTouch ? "touchstart"  : "mousedown",
+        touchMove     = hasTouch ? "touchmove"   : "mousemove",
+        touchEnd      = hasTouch ? "touchend"    : "mouseup",
+        touchCancel   = hasTouch ? "touchcancel" : "mouseleave",
+        longTapDelay  = 750,
+        minTapDelay   = 16,
+        boundaryPoint = hasTouch ? 60 : 30,
         touchTimeout, tapTimeout, swipeTimeout, longTapTimeout
     ;
 
@@ -92,7 +94,6 @@
 
             touch.last     = now;
             longTapTimeout = setTimeout(longTap, longTapDelay);
-
         }
 
         function handleTouchMove(event) {
@@ -102,25 +103,26 @@
             touch.x2 = firstTouch.pageX;
             touch.y2 = firstTouch.pageY;
 
-            deltaX += Math.abs(touch.x1 - touch.x2);
-            deltaY += Math.abs(touch.y1 - touch.y2); 
+            deltaX += touch.x1 ? deltaX + Math.abs(touch.x1 - touch.x2) : 0;
+            deltaY += touch.y1 ? deltaY + Math.abs(touch.y1 - touch.y2) : 0;
         }
 
         function handleTouchEnd() {
+            firstTouch = hasTouch ? event.touches[0] : event;
             cancelLongTap();
             
-            if ((touch.x2 && Math.abs(touch.x1 - touch.x2) > 30) ||
-                (touch.y2 && Math.abs(touch.y1 - touch.y2) > 30)) {
+            if ((touch.x2 && Math.abs(touch.x1 - touch.x2) > boundaryPoint) ||
+                (touch.y2 && Math.abs(touch.y1 - touch.y2) > boundaryPoint)) {
 
                 swipeTimeout = setTimeout(function () {
                     triggerEvent(touch.el, "swipe");
                     triggerEvent(touch.el, "swipe" + swipeDirection(touch.x1, touch.x2, touch.y1, touch.y2));
 
                     resetTouch();
-                }, 0);
+                }, minTapDelay);
             }
             else if ("last" in touch) {
-                if (deltaX < 30 && deltaY < 30) {
+                if (deltaX < boundaryPoint && deltaY < boundaryPoint) {
                     tapTimeout = setTimeout(function () {
                         tapEvent = createEvent("tap");
                         tapEvent.cancelTouch = cancelAll;
@@ -138,7 +140,7 @@
                                 resetTouch();
                             }, 250);
                         }
-                    }, 0);
+                    }, minTapDelay);
                 }
                 else {
                     resetTouch();
@@ -148,9 +150,9 @@
             }
         }
 
-        document.addEventListener(touchStart, function (event) { handleTouchStart(event);  }, false);
-        document.addEventListener(touchMove,  function (event) { handleTouchMove(event);   }, false);
-        document.addEventListener(touchEnd,   function ()      { handleTouchEnd();         }, false);
+        document.addEventListener(touchStart, function (event) { handleTouchStart(event); }, false);
+        document.addEventListener(touchMove,  function (event) { handleTouchMove(event);  }, false);
+        document.addEventListener(touchEnd,   function ()      { handleTouchEnd();        }, false);
 
         document.addEventListener(touchCancel, cancelAll, false);
         global.addEventListener("scroll",      cancelAll, false);
