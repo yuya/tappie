@@ -1,4 +1,4 @@
-// Tappie 1.0.0 Copyright (C) 2014 Yuya Hashimoto, MIT License.
+// Tappie 1.0.1 Copyright (C) 2014 Yuya Hashimoto, MIT License.
 // See https://github.com/yuya/tappie
 ;(function (global, document) {
     var touch         = {},
@@ -21,6 +21,10 @@
     }
 
     function triggerEvent(element, eventName) {
+        if (!element) {
+            return;
+        }
+        
         element.dispatchEvent(createEvent(eventName));
     }
 
